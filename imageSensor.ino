@@ -1,6 +1,8 @@
+#include <driver/adc.h>
 const int RESET = 32;
 const int COLUMN = 34;
 const int BTN = 18;
+const int analogWidth = 11;
 
 volatile bool interruptTriggered = false; // 인터럽트 발생 여부를 저장할 변수
 
@@ -52,13 +54,26 @@ public:
         {
             Serial.println("Expose complete.");
         }
-        int level = analogRead(levelPin);
-        return ((4096 - level) / 4096.0) * 3.3;
+
+        // 오버샘플링 코드
+        int level = 0; // A0에서 읽은 값을 저장할 변수
+
+        // A0 핀을 5번 읽어서 합산
+        for (byte n = 0; n < 5; n++) {
+            level += analogRead(levelPin); // A0 핀에서 값 읽기
+            delay(2); // 2밀리초 지연
+        }
+
+        // A0에서 읽은 값의 평균 계산
+        level = level / 5;
+
+        return ((float)(pow(2, analogWidth) - level) / pow(2, analogWidth)) * 3.3;
     }
 };
 
 void setup()
 {
+    analogSetWidth(analogWidth);
     Serial.begin(115200);
     pinMode(RESET, OUTPUT);
     pinMode(BTN, INPUT_PULLUP);
