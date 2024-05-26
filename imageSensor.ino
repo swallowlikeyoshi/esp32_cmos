@@ -71,13 +71,13 @@ public:
         // A0에서 읽은 값의 평균 계산
         level = level / 5;
 
-        return ((float)(pow(2, ENV::ANALOG_WIDTH) - level) / pow(2, ENV::ANALOG_WIDTH)) * 3.3;
+        return ((float)(pow(2, ENV::ANALOG_WIDTH) - level) / pow(2, ENV::ANALOG_WIDTH));
     }
 };
 
 Pixel P = Pixel(ENV::RESET, ENV::LEVEL);
 
-int resetTime = 3000, expTime = 5000;
+int resetTime = 100, expTime = 10;
 
 void setup()
 {
