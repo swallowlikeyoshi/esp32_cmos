@@ -1,16 +1,20 @@
-#include <driver/adc.h>
-const int RESET = 32;
-const int COLUMN = 34;
-const int BTN = 18;
-const int analogWidth = 11;
+// #include <driver/adc.h>
 
-volatile bool interruptTriggered = false; // 인터럽트 발생 여부를 저장할 변수
+namespace ENV {
+    const int VOLT_MAX = 3.3;
+    const int ANALOG_WIDTH = 11;
 
-// 인터럽트 서비스 루틴 함수
+    const int RESET = 32;
+    const int LEVEL = 34;
+    const int BTN = 18;
+}
+
+volatile bool INTERRUPT_FLAG = false; // 인터럽트 발생 여부를 저장할 변수
+
 void IRAM_ATTR handleInterrupt()
 {
-    interruptTriggered = true;                   // 인터럽트가 발생했음을 기록
-    detachInterrupt(digitalPinToInterrupt(BTN)); // 인터럽트 비활성화
+    INTERRUPT_FLAG = true;                      // 인터럽트가 발생했음을 기록
+    detachInterrupt(digitalPinToInterrupt(ENV::BTN)); // 인터럽트 비활성화
 }
 
 class Pixel
@@ -28,14 +32,14 @@ public:
     void resetCap(int resetTime)
     {
         digitalWrite(resetPin, HIGH);
-        if (interruptTriggered)
+        if (INTERRUPT_FLAG)
         {
             Serial.print("Resetting... resetTime: ");
             Serial.println(resetTime);
         }
         delay(resetTime);
         digitalWrite(resetPin, LOW);
-        if (interruptTriggered)
+        if (INTERRUPT_FLAG)
         {
             Serial.println("Reset complete.");
         }
@@ -44,13 +48,13 @@ public:
     float readLevel(int resetTime, int expTime)
     {
         this->resetCap(resetTime);
-        if (interruptTriggered)
+        if (INTERRUPT_FLAG)
         {
             Serial.print("Exposing... expTime: ");
             Serial.println(expTime);
         }
         delay(expTime);
-        if (interruptTriggered)
+        if (INTERRUPT_FLAG)
         {
             Serial.println("Expose complete.");
         }
@@ -67,34 +71,34 @@ public:
         // A0에서 읽은 값의 평균 계산
         level = level / 5;
 
-        return ((float)(pow(2, analogWidth) - level) / pow(2, analogWidth)) * 3.3;
+        return ((float)(pow(2, ENV::ANALOG_WIDTH) - level) / pow(2, ENV::ANALOG_WIDTH)) * 3.3;
     }
 };
 
+Pixel P = Pixel(ENV::RESET, ENV::LEVEL);
+
+int resetTime = 3000, expTime = 5000;
+
 void setup()
 {
-    analogSetWidth(analogWidth);
+    analogSetWidth(ENV::ANALOG_WIDTH);
     Serial.begin(115200);
-    pinMode(RESET, OUTPUT);
-    pinMode(BTN, INPUT_PULLUP);
-    pinMode(COLUMN, INPUT);
-    attachInterrupt(digitalPinToInterrupt(BTN), handleInterrupt, FALLING);
+    pinMode(ENV::RESET, OUTPUT);
+    pinMode(ENV::BTN, INPUT_PULLUP);
+    pinMode(ENV::LEVEL, INPUT);
+    attachInterrupt(digitalPinToInterrupt(ENV::BTN), handleInterrupt, FALLING);
 }
-
-
-Pixel P = Pixel(RESET, COLUMN);
-int resetTime = 3000, expTime = 5000;
 
 void loop()
 {
-    if (interruptTriggered)
+    if (INTERRUPT_FLAG)
     {
         float level = P.readLevel(resetTime, expTime);
         Serial.println(level);
 
-        interruptTriggered = false; // 인터럽트 처리 완료 표시
+        INTERRUPT_FLAG = false; // 인터럽트 처리 완료 표시
         delay(100);
-        attachInterrupt(digitalPinToInterrupt(BTN), handleInterrupt, FALLING); // 인터럽트 다시 활성화
+        attachInterrupt(digitalPinToInterrupt(ENV::BTN), handleInterrupt, FALLING); // 인터럽트 다시 활성화
     }
 
     if (Serial.available())

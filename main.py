@@ -2,6 +2,7 @@ from control import execute
 import numpy as np
 import matplotlib.pyplot as plt
 
+test_name = input("실험 이름: ")
 brightness_level = int(input("밝기 단계: "))
 test_case = int(input("테스트 수: "))
 resetTime = input("리셋 시간: ")
@@ -32,7 +33,7 @@ def plot_1d_array(data):
     plt.bar(x, data, color='b', align='center')
     
     # 그래프의 제목과 축 레이블을 추가합니다.
-    plt.title('Average Values Bar Graph')
+    plt.title(f'"{test_name}" lv:{brightness_level} tc:{test_case} rT:{resetTime} eT:{expTime}')
     plt.xlabel('Brightness Level')
     plt.ylabel('Average Value')
     
