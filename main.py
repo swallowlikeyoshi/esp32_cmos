@@ -7,7 +7,7 @@ brightness_level = int(input("밝기 단계: "))
 test_case = int(input("테스트 수: "))
 resetTime = input("리셋 시간: ")
 expTime = input("노출 시간: ")
-pd_num = input("PD 갯수: ")
+capacitance = input("Cap 용량: ")
 
 data = np.zeros((brightness_level, test_case))
 execute(f'c {resetTime} {expTime}')
@@ -34,7 +34,7 @@ def plot_1d_array(data):
     plt.bar(x, data, color='b', align='center')
     
     # 그래프의 제목과 축 레이블을 추가합니다.
-    plt.title(f'"{test_name}" lv:{brightness_level} tc:{test_case} rT:{resetTime} eT:{expTime} PD:{pd_num}')
+    plt.title(f'"{test_name}" lv:{brightness_level} tc:{test_case} rT:{resetTime} eT:{expTime} Cap:{capacitance}')
     plt.xlabel('Brightness Level')
     plt.ylabel('Average Value')
     
