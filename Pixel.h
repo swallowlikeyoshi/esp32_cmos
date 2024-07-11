@@ -52,6 +52,8 @@ public:
     {
         this->resetCap(resetTime);
 
+        #ifdef env1
+
         if (INTERRUPT_FLAG)
         {
             Serial.print("Exposing... expTime: ");
@@ -63,8 +65,63 @@ public:
             Serial.println("Expose complete.");
         }
 
+        
         float level = readLevel();
 
-        return convertLevel(level);
+        #endif
+
+        #ifdef env2
+
+        if (INTERRUPT_FLAG) {
+            Serial.print("Exposing... expTime: ");
+            Serial.println(expTime);
+        }
+        
+        // C1, C2 초기화 -> 0V
+        digitalWrite(ENV::S1, HIGH);
+        digitalWrite(ENV::S2, HIGH);
+        digitalWrite(ENV::PC, HIGH);
+
+        delay(resetTime);
+
+        // S2 -> kTC noise level 저장됨.
+        digitalWrite(ENV::S2, LOW);
+
+        // 필요 없을 듯
+        // delay(expTime / 4);
+
+        // 노출 시작
+        digitalWrite(ENV::TG, HIGH);
+
+        delay(expTime);
+
+        // 노출 종료
+        digitalWrite(ENV::TG, LOW);
+
+        // 필요 없을 듯
+        // delay(expTime / 4);
+
+        // S1 -> signal + kTC noise level 저장됨.
+        digitalWrite(ENV::S1, LOW);
+
+        digitalWrite(ENV::PC, LOW);
+
+        // reset level 읽기
+        digitalWrite(ENV::S2, HIGH);
+        
+        float reset_level = readLevel();
+
+        digitalWrite(ENV::S2, LOW);
+        
+        // signal + reset level 읽기
+        digitalWrite(ENV::S1, HIGH);
+
+        float signal_level = readLevel();
+
+        digitalWrite(ENV::S1, LOW);
+
+        #endif
+
+        return convertLevel(signal_level) - convertLevel(reset_level);
     }
 };

@@ -38,12 +38,14 @@ void loop()
 
         if (input.startsWith("r"))
         {
+            // 파이썬 자동화를 위한 코드. 건드리지 말 것.
             Serial.println(resetTime + expTime);
             float level = P.getExposedLevel(resetTime, expTime);
             Serial.println(level);
         }
         else if (input.startsWith("c "))
         {
+            // 시간 설정 변경용 코드
             input.remove(0, 2);
             int firstSpace = input.indexOf(' ');
             if (firstSpace == -1)
@@ -54,8 +56,6 @@ void loop()
 
             String resetTimeStr = input.substring(0, firstSpace);
             String expTimeStr = input.substring(firstSpace + 1);
-
-            // 문자열을 숫자로 변환
             resetTime = resetTimeStr.toInt();
             expTime = expTimeStr.toInt();
             Serial.printf("Changed! resetTime: %d, expTime: %d\n", resetTime, expTime);
@@ -64,47 +64,47 @@ void loop()
         {
             Serial.printf("Printing configs... resetTime: %d, expTime: %d\n", resetTime, expTime);
         }
-        else if (input.startsWith("t "))
-        {
-            input.remove(0, 2);
-            int firstSpace = input.indexOf(' ');
-            int secondSpace = input.lastIndexOf(' ');
-            if (firstSpace == -1 || secondSpace == -1 || firstSpace == secondSpace)
-            {
-                Serial.println("Invalid command format");
-                return;
-            }
+        // else if (input.startsWith("t "))
+        // {
+        //     input.remove(0, 2);
+        //     int firstSpace = input.indexOf(' ');
+        //     int secondSpace = input.lastIndexOf(' ');
+        //     if (firstSpace == -1 || secondSpace == -1 || firstSpace == secondSpace)
+        //     {
+        //         Serial.println("Invalid command format");
+        //         return;
+        //     }
 
-            String resetTimeStr = input.substring(0, firstSpace);
-            String expTimeStr = input.substring(firstSpace + 1, secondSpace);
-            String stepStr = input.substring(secondSpace + 1);
+        //     String resetTimeStr = input.substring(0, firstSpace);
+        //     String expTimeStr = input.substring(firstSpace + 1, secondSpace);
+        //     String stepStr = input.substring(secondSpace + 1);
 
-            int reset = resetTimeStr.toInt();
-            int exp = expTimeStr.toInt();
-            int step = stepStr.toInt();
+        //     int reset = resetTimeStr.toInt();
+        //     int exp = expTimeStr.toInt();
+        //     int step = stepStr.toInt();
 
-            Serial.printf("reset: %d, exp: %d, step: %d\n", reset, exp, step);
+        //     Serial.printf("reset: %d, exp: %d, step: %d\n", reset, exp, step);
 
-            float *array = new float[step];
-            // chargingGraph(P, array, reset, exp, step);
+        //     float *array = new float[step];
+        //     // chargingGraph(P, array, reset, exp, step);
 
-            memset(array, 0, sizeof(float) * step); // 배열 초기화
-            int duration = exp / step;
+        //     memset(array, 0, sizeof(float) * step); // 배열 초기화
+        //     int duration = exp / step;
 
-            P.resetCap(reset);
-            for (int i = 0; i < step; i++)
-            {
-                array[i] = P.convertLevel(P.readLevel());
-                delay(duration);
-            }
+        //     P.resetCap(reset);
+        //     for (int i = 0; i < step; i++)
+        //     {
+        //         array[i] = P.convertLevel(P.readLevel());
+        //         delay(duration);
+        //     }
 
-            for (int i = 0; i < step; i++)
-            {
-                Serial.printf("%f ", array[i]);
-                Serial.println();
-            }
-            delete[] array; // 동적 배열 메모리 해제
-        }
+        //     for (int i = 0; i < step; i++)
+        //     {
+        //         Serial.printf("%f ", array[i]);
+        //         Serial.println();
+        //     }
+        //     delete[] array; // 동적 배열 메모리 해제
+        // }
         else
         {
             Serial.println("Invalid command");
